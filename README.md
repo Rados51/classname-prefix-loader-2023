@@ -26,7 +26,7 @@ class MyComponent extends React.Component {
 export default MyComponent;
 ```
 
-Also works with [classnames](https://github.com/JedWatson/classnames) module!
+Also works with [classnames](https://github.com/JedWatson/classnames) and [clsx](https://github.com/lukeed/clsx) modules!
 
 ## Installation
 
@@ -66,3 +66,4 @@ module: {
 Plugin based on
 
 - [react-classname-prefix-loader](https://github.com/vezetvsem/react-classname-prefix-loader) create by [vezetvsem](https://github.com/vezetvsem).
+- [react-classname-prefix-with-lookup](https://github.com/nagendertank/react-classname-prefix-with-lookup) create by [nagendertank](https://github.com/nagendertank).

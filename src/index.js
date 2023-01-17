@@ -1,5 +1,5 @@
 const classNameRegex = /className=\"([0-9a-zA-Z\-\_\s]*)\"/gi;
-const classNamesRegex = /(?:cn|classname|clsx)\(((?:.|\s)*?)\)/gim;
+const classNamesRegex = /(?:classname|clsx)\(((?:.|\s)*?)\)/gim;
 const stringBetweenQuotesRegex = /(["'])(\\?.)*?\1/gim;
 import { getOptions } from "loader-utils";
 import validateOptions from "schema-utils";
