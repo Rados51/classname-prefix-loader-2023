@@ -22,38 +22,30 @@ const schema = {
 	},
 };
 
-function loader(source, inputSourceMap) {
-	const options = getOptions(this);
-	const self = this;
+function classMatchesTest(className, ignore) {
+	if (!ignore) return false;
 
-	const callback = this.async();
+	className = className.trim();
 
-	let cssContent = "";
+	if (ignore instanceof RegExp) return ignore.exec(className);
 
-	validateOptions(schema, options, "React ClassName Prefix Loader");
+	if (Array.isArray(ignore)) {
+		return ignore.some((test) => {
+			if (test instanceof RegExp) return test.exec(className);
 
-	async.eachSeries(
-		// Pass items to iterate over
-		options.fileName,
-		// Pass iterator function that is called for each item
-		function (filename, cb) {
-			fs.readFile(filename, "utf8", function (err, content) {
-				var filePath = path.resolve(filename);
+			return className === test;
+		});
+	}
 
-				self.addDependency(filePath);
+	return className === ignore;
+}
 
-				cssContent = cssContent.concat(content);
-				cssContent = cssContent.concat("\n");
-				// Calling cb makes it go to the next item.
-				cb(err);
-			});
-		},
-		// Final callback after each item has been iterated over.
-		function (err) {
-			checkFiles(cssContent, options.prefix, source, function () {
-				callback(null, modifiedSource, inputSourceMap);
-			});
-		},
+function ignoreClassName(className, options = {}) {
+	return (
+		classMatchesTest(className, options.ignore) ||
+		className.trim().length === 0 ||
+		/^[A-Z-]/.test(className) ||
+		ignore.findIndex((item) => className === item) >= 0
 	);
 }
 
@@ -93,9 +85,10 @@ function checkFiles(content, prefix, source, callback) {
 				.map((className) => {
 					if (
 						className.indexOf(prefix) >= 0 ||
-						ignoreClassName(className) ||
-						content.indexOf(className) < 0
+						ignoreClassName(className)
+						// || content.indexOf(className) < 0
 					) {
+						//console.log(`::${className}`);
 						return className;
 					}
 
@@ -103,6 +96,7 @@ function checkFiles(content, prefix, source, callback) {
 				})
 				.join(" ");
 
+			//console.log(prefixedClassNames);
 			return `${attr}='${prefixedClassNames}'`;
 		});
 	}
@@ -110,31 +104,39 @@ function checkFiles(content, prefix, source, callback) {
 	callback();
 }
 
-function ignoreClassName(className, options = {}) {
-	return (
-		classMatchesTest(className, options.ignore) ||
-		className.trim().length === 0 ||
-		/^[A-Z-]/.test(className) ||
-		ignore.findIndex((item) => className === item) >= 0
+function loader(source, inputSourceMap) {
+	const options = getOptions(this);
+	const self = this;
+
+	const callback = this.async();
+
+	let cssContent = "";
+
+	validateOptions(schema, options, "React ClassName Prefix Loader");
+
+	async.eachSeries(
+		// Pass items to iterate over
+		options.fileName,
+		// Pass iterator function that is called for each item
+		function (filename, cb) {
+			fs.readFile(filename, "utf8", function (err, content) {
+				var filePath = path.resolve(filename);
+
+				self.addDependency(filePath);
+
+				cssContent = cssContent.concat(content);
+				cssContent = cssContent.concat("\n");
+				// Calling cb makes it go to the next item.
+				cb(err);
+			});
+		},
+		// Final callback after each item has been iterated over.
+		function (err) {
+			checkFiles(cssContent, options.prefix, source, function () {
+				callback(null, modifiedSource, inputSourceMap);
+			});
+		},
 	);
-}
-
-function classMatchesTest(className, ignore) {
-	if (!ignore) return false;
-
-	className = className.trim();
-
-	if (ignore instanceof RegExp) return ignore.exec(className);
-
-	if (Array.isArray(ignore)) {
-		return ignore.some((test) => {
-			if (test instanceof RegExp) return test.exec(className);
-
-			return className === test;
-		});
-	}
-
-	return className === ignore;
 }
 
 export default loader;
